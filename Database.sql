@@ -9,6 +9,7 @@ CREATE TABLE Personas (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Nombre VARCHAR(50) NOT NULL,
     Apellido VARCHAR(50) NOT NULL,
+    Documento VARCHAR(50) NOT NULL UNIQUE,
     FechaNacimiento DATE NOT NULL,
     CorreoElectronico VARCHAR(100)
 );

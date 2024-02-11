@@ -19,41 +19,38 @@ public class EjercicioConexion {
     private static final String USUARIO = "root";
     private static final String PASSWORD = "tu_contraseña";  // Reemplaza con tu contraseña real
 
+    // Cargar el driver JDBC
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.out.println("No se pudo cargar el driver de JDBC");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         crearNuevaPersona("Miguel", "Pineda", "1993-12-14", "mapineda48@soy.sena.edu.co");
-        
+
         consultarPersonas();
-        
+
         actualizarNombrePersonas("AprendizSENA");
-        
+
         consultarPersonas();
-        
+
         eliminarTodasLasPersonas();
-        
+
         consultarPersonas();
     }
 
     public static void crearNuevaPersona(String nombre, String apellido, String fechaNacimiento, String correoElectronico) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
+        String sql = "INSERT INTO Personas (Nombre, Apellido, FechaNacimiento, CorreoElectronico) VALUES (?, ?, ?, ?)";
 
-        try {
-            // Cargar el driver JDBC
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            // Establecer la conexión
-            conn = DriverManager.getConnection(URL, USUARIO, PASSWORD);
-
-            // Crear la sentencia SQL para insertar datos
-            String sql = "INSERT INTO Personas (Nombre, Apellido, FechaNacimiento, CorreoElectronico) VALUES (?, ?, ?, ?)";
-
-            // Preparar la sentencia
-            pstmt = conn.prepareStatement(sql);
-
-            // Insertar el primer registro
+        try (Connection conn = DriverManager.getConnection(URL, USUARIO, PASSWORD); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Insertar el registro
             pstmt.setString(1, nombre);
             pstmt.setString(2, apellido);
             pstmt.setDate(3, java.sql.Date.valueOf(fechaNacimiento));
@@ -61,26 +58,8 @@ public class EjercicioConexion {
             pstmt.executeUpdate();
 
             System.out.println("Registros insertados con éxito.");
-
-        } catch (ClassNotFoundException e) {
-            System.out.println("No se encontró el driver de JDBC");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.out.println("Error al conectarse a la base de datos");
-            e.printStackTrace();
-        } finally {
-            // Cerrar los recursos en orden inverso a su apertura
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                System.out.println("Error al cerrar la conexión");
-                e.printStackTrace();
-            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -123,7 +102,7 @@ public class EjercicioConexion {
 
     public static void eliminarTodasLasPersonas() {
         String sql = "DELETE FROM Personas";
-        
+
         try (Connection conn = DriverManager.getConnection(URL, USUARIO, PASSWORD); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             int affectedRows = pstmt.executeUpdate();
